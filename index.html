@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Bienvenido al portal empresarial para análisis de datos con Inteligencia Artificial Generativa. </title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .contenedor {
+            display: flex;
+            margin-top: 20px;
+        }
+
+        .grupo {
+            display: flex;
+            flex-direction: column;
+            margin-left: 10px;
+        }
+
+        .valor {
+            font-weight: bold;
+            margin-top: 5px;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1>Bienvenido al portal empresarial para análisis de datos con Inteligencia Artificial Generativa.</h1>
+        <p>Escribe tu prompt a continuación para obtener el comparativo de respuestas de los modelos GPT 3.5 y Google Gemini Pro.</p>
+        <form>
+            <div class="form-group">
+                <label for="prompt">Prompt</label>
+                <textarea class="form-control" id="prompt" name="prompt" rows="1"></textarea>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="enviarFormulario()">Obtener respuesta</button>
+        </form>
+        <div id="gpt3-response" class="mt-3"></div>
+
+        <h5>Respuesta de Chat GPT</h5>
+        <p id="responseGPT">.</p>
+        <b>Tokens consumidos</b>
+        <div class="contenedor">
+            <div class="grupo">
+                <p>Mensaje</p>
+                <div id="mensajeValorGPT" class="valor">125</div>
+            </div>
+            <div class="grupo">
+                <p>Respuesta</p>
+                <div id="respuestaValorGPT" class="valor">50</div>
+            </div>
+            <div class="grupo">
+                <p>Total</p>
+                <div id="totalValorGPT" class="valor">175</div>
+            </div>
+        </div>
+        <br>
+
+        <h5>Respuesta de Google Gemini</h5>
+        <p id="responseGemini">.</p>
+        <b>Tokens consumidos</b>
+        <div class="contenedor">
+            <div class="grupo">
+                <p>Mensaje</p>
+                <div id="mensajeValorGemini" class="valor">125</div>
+            </div>
+            <div class="grupo">
+                <p>Respuesta</p>
+                <div id="respuestaValorGemini" class="valor">50</div>
+            </div>
+            <div class="grupo">
+                <p>Total</p>
+                <div id="totalValorGemini" class="valor">175</div>
+            </div>
+        </div>
+        <!-- RESPUESTA DE Google Gemini pro 1.0 -->
+    </div>
+
+    <script>
+        // Espera a que el DOM esté completamente cargado
+        function enviarFormulario() {
+            // Obtener el valor del campo Prompt
+            var promptValue = $("#prompt").val();
+
+            // Construir el objeto JSON
+            var jsonData = {
+                "prompt": promptValue
+            };
+            $("#responseGPT").text("Generando...");
+            $("#mensajeValorGPT").text("...");
+            $("#respuestaValorGPT").text("...");
+            $("#totalValorGPT").text("...");
+            $("#responseGemini").text("Generando...");
+            $("#mensajeValorGemini").text("...");
+            $("#respuestaValorGemini").text("...");
+            $("#totalValorGemini").text("...");
+            // Realizar la solicitud POST
+            $.ajax({
+                type: "POST",
+                url: "http://127.0.0.1:5000/recibe_prompt",
+                contentType: "application/json",
+                data: JSON.stringify(jsonData),
+                success: function (response) {
+                    // Manejar la respuesta del servidor
+                    console.log("Respuesta del servidor:", response);
+                    /*GPT*/
+                    $("#responseGPT").text(response.GPT.Text);
+                    $("#mensajeValorGPT").text(response.GPT.TokensPrompt);
+                    $("#respuestaValorGPT").text(response.GPT.TokensCompletion);
+                    $("#totalValorGPT").text(response.GPT.TotalTokens);
+
+                    /*Gemini*/
+                    $("#responseGemini").text(response.Gemini.Text);
+                    $("#mensajeValorGemini").text(response.Gemini.TokensPrompt);
+                    $("#respuestaValorGemini").text(response.Gemini.TokensCompletion);
+                    $("#totalValorGemini").text(response.Gemini.TotalTokens);
+                    //alert("Respuesta del servidor: " + JSON.stringify(response));
+                },
+                error: function (error) {
+                    // Manejar errores
+                    $("#responseGPT").text("Error en la solicitud.");
+                    $("#responseGemini").text("Error en la solicitud.");
+                    console.error("Error en la solicitud:", error);
+                    //alert("Error en la solicitud. Consulta la consola para más detalles.");
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
